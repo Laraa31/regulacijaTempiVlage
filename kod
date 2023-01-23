@@ -1,0 +1,108 @@
+// Include Libraries
+#include "Arduino.h"
+#include "DHT.h"
+
+
+// Pin Definitions
+#define DHT_PIN_DATA	2
+#define RELAYGRAVITY_PIN_SIG	3
+
+
+
+// Global variables and defines
+
+// object initialization
+DHT dht(DHT_PIN_DATA);
+
+
+// define vars for testing menu
+const int timeout = 10000;       //define timeout of 10 sec
+char menuOption = 0;
+long time0;
+
+// Setup the essentials for your circuit to work. It runs first every time your circuit is powered with electricity.
+void setup() 
+{
+    // Setup Serial which is useful for debugging
+    // Use the Serial Monitor to view printed messages
+    Serial.begin(9600);
+    while (!Serial) ; // wait for serial port to connect. Needed for native USB
+    Serial.println("start");
+    
+    dht.begin();
+    menuOption = menu();
+    
+}
+
+// Main logic of your circuit. It defines the interaction between the components you selected. After setup, it runs over and over again, in an eternal loop.
+void loop() 
+{
+    
+    
+    if(menuOption == '1') {
+    // DHT22/11 Humidity and Temperature Sensor - Test Code
+    // Reading humidity in %
+    float dhtHumidity = dht.readHumidity();
+    // Read temperature in Celsius, for Fahrenheit use .readTempF()
+    float dhtTempC = dht.readTempC();
+    
+    if(dthHumidity<=50%){    //checkes if humidity is 50% or lower and then prints out it's good.
+     Serial.print(F("Humidity is good, it's at: ")); Serial.print(dhtHumidity); Serial.print(F(" [%]\t"));
+    }
+    else{                      //else humiditiy is over 50% and bad for mushrooms
+         Serial.print(F("Humidity is bad, it's at: ")); Serial.print(dhtHumidity); Serial.print(F(" [%]\t"));
+    }
+    
+    if(dthTempC<40&&dthTempC>60){           //checkes if humidity is lower then 40 an higher then 60 and then prints out it's bad
+     Serial.print(F("Temperature is bad, it's at: ")); Serial.print(dhtTempC); Serial.println(F(" [C]"));
+    }
+    else{                          //else humiditiy is over 50% and bad for mushrooms
+        Serial.print(F("Temperature is good, it's at: ")); Serial.print(dhtTempC); Serial.println(F(" [C]"));
+     }
+    }
+    else if(menuOption == '2')
+    {
+    // Disclaimer: The Digital 5A Relay Module - Gravity is in testing and/or doesn't have code, therefore it may be buggy. Please be kind and report any bugs you may find.
+    }
+    
+    if (millis() - time0 > timeout)
+    {
+        menuOption = menu();
+    }
+    
+}
+
+
+
+// Menu function for selecting the components to be tested
+// Follow serial monitor for instrcutions
+char menu()
+{
+
+    Serial.println(F("\nWhich component would you like to test?"));
+    Serial.println(F("(1) DHT22/11 Humidity and Temperature Sensor"));
+    Serial.println(F("(2) Digital 5A Relay Module - Gravity"));
+    Serial.println(F("(menu) send anything else or press on board reset button\n"));
+    while (!Serial.available());
+
+    // Read data from serial monitor if received
+    while (Serial.available()) 
+    {
+        char c = Serial.read();
+        if (isAlphaNumeric(c)) 
+        {   
+            
+            if(c == '1') 
+    			Serial.println(F("Now Testing DHT22/11 Humidity and Temperature Sensor"));
+    		else if(c == '2') 
+    			Serial.println(F("Now Testing Digital 5A Relay Module - Gravity - note that this component doesn't have a test code"));
+            else
+            {
+                Serial.println(F("illegal input!"));
+                return 0;
+            }
+            time0 = millis();
+            return c;
+        }
+    }
+}
